@@ -135,6 +135,18 @@ const filter = { _id: carId };
   });
 });
 
+app.get("/bookings", async (req, res) => {
+  const email = req.query.email;
+
+  const query = { userEmail: email };
+
+  const result = await bookingCollection.find(query).toArray();
+
+  res.send(result);
+});
+
+
+
 
 
 
