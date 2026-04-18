@@ -32,6 +32,7 @@ async function run() {
     const carCollection = db.collection("cars");
     const newestCarCollection = db.collection("newestCars");
     const addCarCollection = db.collection("addCar");
+    const bookingCollection=db.collection("bookings");
 
     app.get("/cars", async (req, res) => {
       const result = await carCollection
@@ -107,6 +108,40 @@ async function run() {
       res.send(result);
       console.log(result);
     });
+
+  
+
+app.post("/bookings", async (req, res) => {
+  const booking = req.body;
+ console.log(booking);
+  const carId = booking.carId;
+  console.log(carId);
+
+const filter = { _id: carId };
+  console.log(filter);
+  const updateDoc = {
+    $set: { status: booking.status },
+  };
+
+  const updateResult = await carCollection.updateOne(filter, updateDoc);
+
+
+  const bookingResult = await bookingCollection.insertOne(booking);
+
+  res.send({
+    success: true,
+    updateResult,
+    bookingResult,
+  });
+});
+
+
+
+
+
+
+
+
   } finally {
   }
 }
