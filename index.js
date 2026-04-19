@@ -34,14 +34,14 @@ async function run() {
     const addCarCollection = db.collection("addCar");
     const bookingCollection=db.collection("bookings");
 
-    app.get("/cars", async (req, res) => {
-      const result = await carCollection
-        .find()
-        .limit(6)
-        .toArray();
-      console.log(result);
-      res.send(result);
-    });
+    // app.get("/cars", async (req, res) => {
+    //   const result = await carCollection
+    //     .find()
+    //     .limit(6)
+    //     .toArray();
+    //   // console.log(result);
+    //   res.send(result);
+    // });
 
     app.post("/cars", async (req, res) => {
       const newCar = req.body;
@@ -98,16 +98,19 @@ async function run() {
       }
     });
 
-    app.get("/addCar", async (req, res) => {
-      const email = req.query.email;
+   app.get("/cars", async (req, res) => {
+  const email = req.query.email;
+  console.log(email);
 
-      const query = { providerEmail: email };
+  let query = {};
 
-      const result = await addCarCollection.find(query).toArray();
+  if (email) {
+    query = { providerEmail: email }; // My Listings
+  }
 
-      res.send(result);
-      console.log(result);
-    });
+  const result = await carCollection.find(query).toArray();
+  res.send(result);
+});
 
   
 
