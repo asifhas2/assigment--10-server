@@ -32,16 +32,67 @@ async function run() {
     const carCollection = db.collection("cars");
     const newestCarCollection = db.collection("newestCars");
     const addCarCollection = db.collection("addCar");
-    const bookingCollection=db.collection("bookings");
+    const bookingCollection = db.collection("bookings");
 
-    // app.get("/cars", async (req, res) => {
-    //   const result = await carCollection
-    //     .find()
-    //     .limit(6)
-    //     .toArray();
-    //   // console.log(result);
-    //   res.send(result);
-    // });
+
+  app.patch("/cars/:id", async (req, res) => {
+  const id = req.params.id;
+  const updatedCar = req.body;
+
+  const filter = { _id: new ObjectId(id) };
+
+  const updateDoc = {
+    $set: {
+      carName: updatedCar.carName,
+      description: updatedCar.description,
+      category: updatedCar.category,
+      rentPricePerDay: updatedCar.rentPricePerDay,
+      location: updatedCar.location,
+      image: updatedCar.image,
+      status: updatedCar.status,
+    },
+  };
+
+  const result = await carCollection.updateOne(filter, updateDoc);
+
+  res.send(result);
+});
+
+app.delete("/cars/:id", async (req, res) => {
+  const id = req.params.id;
+
+  const filter = { _id: new ObjectId(id) };
+
+  const result = await carCollection.deleteOne(filter);
+
+  res.send(result);
+});
+
+
+   app.post("/bookings", async (req, res) => {
+      const booking = req.body;
+      console.log(booking);
+      const carId = booking.carId;
+      console.log(carId);
+
+      const filter = { _id: carId };
+      console.log(filter);
+      const updateDoc = {
+        $set: { status: booking.status },
+      };
+
+      const updateResult = await carCollection.updateOne(filter, updateDoc);
+
+      const bookingResult = await bookingCollection.insertOne(booking);
+
+      res.send({
+        success: true,
+        updateResult,
+        bookingResult,
+      });
+    });
+
+     
 
     app.post("/cars", async (req, res) => {
       const newCar = req.body;
@@ -50,22 +101,20 @@ async function run() {
     });
 
     app.get("/cars/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
+      try {
+        const id = req.params.id;
 
-
-    const car = await carCollection.findOne({
-      _id: id,
+        const car = await carCollection.findOne({
+          _id: id,
+        });
+        res.send(car);
+      } catch (error) {
+        res.status(500).send({
+          message: "Server error",
+          error: error.message,
+        });
+      }
     });
-    res.send(car);
-
-  } catch (error) {
-    res.status(500).send({
-      message: "Server error",
-      error: error.message,
-    });
-  }
-});
 
     //  newest cars serverApi
     app.get("/topCars", async (req, res) => {
@@ -98,65 +147,52 @@ async function run() {
       }
     });
 
-   app.get("/cars", async (req, res) => {
-  const email = req.query.email;
-  console.log(email);
+    app.get("/cars", async (req, res) => {
+      const email = req.query.email;
+      console.log(email);
 
-  let query = {};
+      let query = {};
 
-  if (email) {
-    query = { providerEmail: email }; // My Listings
-  }
+      if (email) {
+        query = { providerEmail: email }; // My Listings
+      }
 
-  const result = await carCollection.find(query).toArray();
-  res.send(result);
-});
+      const result = await carCollection.find(query).toArray();
+      res.send(result);
+    });
 
-  
+    app.post("/bookings", async (req, res) => {
+      const booking = req.body;
+      console.log(booking);
+      const carId = booking.carId;
+      console.log(carId);
 
-app.post("/bookings", async (req, res) => {
-  const booking = req.body;
- console.log(booking);
-  const carId = booking.carId;
-  console.log(carId);
+      const filter = { _id: carId };
+      console.log(filter);
+      const updateDoc = {
+        $set: { status: booking.status },
+      };
 
-const filter = { _id: carId };
-  console.log(filter);
-  const updateDoc = {
-    $set: { status: booking.status },
-  };
+      const updateResult = await carCollection.updateOne(filter, updateDoc);
 
-  const updateResult = await carCollection.updateOne(filter, updateDoc);
+      const bookingResult = await bookingCollection.insertOne(booking);
 
+      res.send({
+        success: true,
+        updateResult,
+        bookingResult,
+      });
+    });
 
-  const bookingResult = await bookingCollection.insertOne(booking);
+    app.get("/bookings", async (req, res) => {
+      const email = req.query.email;
 
-  res.send({
-    success: true,
-    updateResult,
-    bookingResult,
-  });
-});
+      const query = { userEmail: email };
 
-app.get("/bookings", async (req, res) => {
-  const email = req.query.email;
+      const result = await bookingCollection.find(query).toArray();
 
-  const query = { userEmail: email };
-
-  const result = await bookingCollection.find(query).toArray();
-
-  res.send(result);
-});
-
-
-
-
-
-
-
-
-
-
+      res.send(result);
+    });
   } finally {
   }
 }
